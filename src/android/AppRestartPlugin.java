@@ -65,7 +65,7 @@ public class AppRestartPlugin extends CordovaPlugin {
       }
     }
 
-    public void doRestart(int delay = 10000) {
+    public void doRestart(int delay) {
       final Context context = this.cordova.getActivity();
 
       Intent mStartActivity = new Intent(context, MainActivity.class);
@@ -77,10 +77,10 @@ public class AppRestartPlugin extends CordovaPlugin {
     }
 }
 
-public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+private class ExceptionHandler implements Thread.UncaughtExceptionHandler {
   private AppRestartPlugin _plugin;
 
-  constructor(AppRestartPlugin plugin) {
+  public ExceptionHandler(AppRestartPlugin plugin) {
     this._plugin = plugin;
   }
 
