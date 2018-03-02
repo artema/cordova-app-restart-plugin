@@ -40,7 +40,7 @@ public class AppRestartPlugin extends CordovaPlugin {
 
     public void restart(CallbackContext callbackContext) {
       try {
-        AppRestartPlugin.doRestart(100);
+        this.doRestart(100);
 
         JSONObject json = new JSONObject();
         callbackContext.success(json);
@@ -77,7 +77,7 @@ public class AppRestartPlugin extends CordovaPlugin {
     }
 }
 
-private class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+class ExceptionHandler implements Thread.UncaughtExceptionHandler {
   private AppRestartPlugin _plugin;
 
   public ExceptionHandler(AppRestartPlugin plugin) {
