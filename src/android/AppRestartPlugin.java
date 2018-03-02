@@ -22,6 +22,8 @@ import android.util.Log;
 import com.digitaltouchsystems.snap.MainActivity;
 
 public class AppRestartPlugin extends CordovaPlugin {
+  private static boolean _autorestart;
+
   @Override
   public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
     if (action.equals("restart")) {
@@ -29,7 +31,7 @@ public class AppRestartPlugin extends CordovaPlugin {
       return true;
     }
     else if (action.equals("autorestart")) {
-      this.restart(callbackContext);
+      this.autorestart(callbackContext);
       return true;
     }
 
@@ -37,15 +39,8 @@ public class AppRestartPlugin extends CordovaPlugin {
   }
 
     public void restart(CallbackContext callbackContext) {
-      final Context context = this.cordova.getActivity();
-
       try {
-        Intent mStartActivity = new Intent(context, MainActivity.class);
-        int mPendingIntentId = 123456;
-        PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
-        AlarmManager mgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
-        System.exit(0);
+        AppRestartPlugin.doRestart(100);
 
         JSONObject json = new JSONObject();
         callbackContext.success(json);
@@ -54,4 +49,43 @@ public class AppRestartPlugin extends CordovaPlugin {
         callbackContext.error("Failed to restart :" + e.getMessage());
       }
     }
+
+    public void autorestart(CallbackContext callbackContext) {
+      try {
+        if (!AppRestartPlugin._autorestart) {
+          Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+          AppRestartPlugin._autorestart = true;
+        }
+
+        JSONObject json = new JSONObject();
+        callbackContext.success(json);
+      }
+      catch (Exception e) {
+        callbackContext.error("Failed to autorestart :" + e.getMessage());
+      }
+    }
+
+    public void doRestart(int delay = 10000) {
+      final Context context = this.cordova.getActivity();
+
+      Intent mStartActivity = new Intent(context, MainActivity.class);
+      int mPendingIntentId = 123456;
+      PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+      AlarmManager mgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+      mgr.set(AlarmManager.RTC, System.currentTimeMillis() + delay, mPendingIntent);
+      System.exit(0);
+    }
+}
+
+public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
+  private AppRestartPlugin _plugin;
+
+  constructor(AppRestartPlugin plugin) {
+    this._plugin = plugin;
+  }
+
+  @Override
+  public void uncaughtException(Thread thread, Throwable ex) {
+    this._plugin.doRestart(10000);
+  }
 }
