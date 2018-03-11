@@ -40,7 +40,7 @@ public class AppRestartPlugin extends CordovaPlugin {
 
     public void restart(CallbackContext callbackContext) {
       try {
-        this.doRestart(100);
+        this.doRestart(0);
 
         JSONObject json = new JSONObject();
         callbackContext.success(json);
@@ -66,14 +66,24 @@ public class AppRestartPlugin extends CordovaPlugin {
     }
 
     public void doRestart(int delay) {
-      final Context context = this.cordova.getActivity();
+      final Context context = this.cordova.getActivity().getApplicationContext();
 
       Intent mStartActivity = new Intent(context, MainActivity.class);
-      int mPendingIntentId = 123456;
-      PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
-      AlarmManager mgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-      mgr.set(AlarmManager.RTC, System.currentTimeMillis() + delay, mPendingIntent);
-      System.exit(0);
+
+      if (delay == 0) {
+        context.startActivity(mStartActivity);
+      }
+      else {
+        // int mPendingIntentId = 123456;
+        // PendingIntent mPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+        // AlarmManager mgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        // mgr.set(AlarmManager.RTC, System.currentTimeMillis() + delay, mPendingIntent);
+        //System.exit(0);
+
+        Intent intent = new Intent();
+        intent.setAction("php.intent.action.REBOOT");
+        context.sendBroadcast(intent);
+      }
     }
 }
 
